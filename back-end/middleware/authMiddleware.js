@@ -26,7 +26,7 @@ exports.protect = async (req, res, next) => {
       let model;
 
       switch (decoded.role) {
-        case 'departmenthead':
+        case 'departmentHead':
           model = DepartmentHead;
           break;
         case 'instructor':

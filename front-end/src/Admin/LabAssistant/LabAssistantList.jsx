@@ -7,7 +7,7 @@ import {
   DeleteButton, 
 } from "react-admin";
 
-const ParentList = () => (
+const LabAssistantList = () => (
   <List 
     sort={{ field: 'created_at', order: 'DESC' }}
     perPage={25}
@@ -18,11 +18,11 @@ const ParentList = () => (
         <TextField source="lastName" label="Last Name"  />
         <TextField source="email" label="Email"  />
         <TextField source="address" label="address"  />
-        <TextField source="phone" type="tel" label="phone Number"  />
+        <TextField source="departmentId" type="tel" label="Department Name"  />
       <EditButton />
       <DeleteButton />
     </Datagrid>
   </List>
 );
 
-export default ParentList;
+export default LabAssistantList;

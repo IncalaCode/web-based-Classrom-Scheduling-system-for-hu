@@ -87,7 +87,7 @@ exports.token_refresh = async (req, res) => {
     let model;
     
     switch (decoded.role) {
-      case 'departmenthead':
+      case 'departmentHead':
         model = DepartmentHead;
         break;
       case 'instructor':

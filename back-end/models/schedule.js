@@ -1,4 +1,3 @@
-'use strict';
 const { Model } = require('sequelize');
 
 module.exports = (sequelize, DataTypes) => {
@@ -9,30 +8,18 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      // define association here
+      // Associate with Course model
       Schedule.belongsTo(models.Course, {
         foreignKey: 'courseId',
-        as: 'course'
+        as: 'course',
+        onDelete: 'CASCADE'
       });
       
+      // Associate with Classroom model
       Schedule.belongsTo(models.Classroom, {
         foreignKey: 'classroomId',
-        as: 'classroom'
-      });
-      
-      Schedule.belongsTo(models.LabRoom, {
-        foreignKey: 'labRoomId',
-        as: 'labRoom'
-      });
-      
-      Schedule.belongsTo(models.InstructorList, {
-        foreignKey: 'instructorListId',
-        as: 'instructor'
-      });
-      
-      Schedule.belongsTo(models.LabAssistantList, {
-        foreignKey: 'labAssistantListId',
-        as: 'labAssistant'
+        as: 'classroom',
+        onDelete: 'SET NULL'
       });
     }
   }
@@ -41,153 +28,122 @@ module.exports = (sequelize, DataTypes) => {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
-      primaryKey: true,
-      allowNull: false
+      primaryKey: true
     },
     courseId: {
       type: DataTypes.UUID,
       allowNull: false,
+      field: 'course_id',
       references: {
         model: 'Courses',
         key: 'id'
       }
     },
-    courseTitle: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    courseCode: {
-      type: DataTypes.STRING,
-      allowNull: false
+    departmentId : {
+      type: DataTypes.UUID,
+      allowNull: false,
     },
     classroomId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
+      field: 'classroom_id',
       references: {
         model: 'Classrooms',
         key: 'id'
       }
     },
-    classroomNumber: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    labRoomId: {
-      type: DataTypes.UUID,
+    dayOfWeek: {
+      type: DataTypes.ENUM('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
       allowNull: false,
-      references: {
-        model: 'LabRooms',
-        key: 'id'
-      }
+      field: 'day_of_week'
     },
-    labRoomNumber: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    instructorListId: {
-      type: DataTypes.UUID,
+    startTime: {
+      type: DataTypes.TIME,
       allowNull: false,
-      references: {
-        model: 'instructor_lists',
-        key: 'id'
-      }
+      field: 'start_time'
     },
-    instructorFirstName: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    instructorLastName: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    labAssistantListId: {
-      type: DataTypes.UUID,
+    endTime: {
+      type: DataTypes.TIME,
       allowNull: false,
-      references: {
-        model: 'lab_assistant_lists',
-        key: 'id'
-      }
+      field: 'end_time'
     },
-    labAssistantFirstName: {
+    roomNumber: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true,
+      field: 'room_number'
     },
-    labAssistantLastName: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    year: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        isInt: {
-          msg: 'Year must be an integer'
-        },
-        min: {
-          args: [1],
-          msg: 'Year must be at least 1'
-        }
-      }
-    },
-    semester: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        isInt: {
-          msg: 'Semester must be an integer'
-        },
-        min: {
-          args: [1],
-          msg: 'Semester must be at least 1'
-        },
-        max: {
-          args: [2],
-          msg: 'Semester cannot be more than 2'
-        }
-      }
-    },
-    program: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    lecPeriod: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    labPeriod: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    timeSlot: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-    conflictStatus: {
-      type: DataTypes.ENUM('None', 'Pending', 'Resolved'),
-      allowNull: false,
-      defaultValue: 'None'
-    },
-    conflictType: {
-      type: DataTypes.ENUM('Room Conflict', 'InstructorL Conflict', 'LabAssistantL conflict', 'Time Conflict', 'Other'),
-      allowNull: true
-    },
-    draft: {
+    isActive: {
       type: DataTypes.BOOLEAN,
-      allowNull: false,
       defaultValue: true
     },
     createdAt: {
-      allowNull: false,
-      type: DataTypes.DATE
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     },
     updatedAt: {
-      allowNull: false,
-      type: DataTypes.DATE
+      type: DataTypes.DATE,
+      defaultValue: DataTypes.NOW,
     }
   }, {
     sequelize,
     modelName: 'Schedule',
+    tableName: 'Schedules',
+    timestamps: true,
+    hooks: {
+      beforeCreate: async (schedule, options) => {
+        await checkScheduleConflicts(schedule, options, sequelize);
+      },
+      beforeUpdate: async (schedule, options) => {
+        if (schedule.changed('classroomId') || 
+            schedule.changed('dayOfWeek') || 
+            schedule.changed('startTime') || 
+            schedule.changed('endTime')) {
+          await checkScheduleConflicts(schedule, options, sequelize);
+        }
+      }
+    }
   });
+  
+  // Function to check for schedule conflicts
+  async function checkScheduleConflicts(schedule, options, sequelize) {
+    // Only check conflicts if a classroom is assigned
+    if (!schedule.classroomId) return;
+    
+    const { Op } = require('sequelize');
+    const Schedule = sequelize.models.Schedule;
+    
+    // Find any overlapping schedules for the same classroom and day
+    const conflictingSchedules = await Schedule.findAll({
+      where: {
+        id: { [Op.ne]: schedule.id }, // Exclude current schedule
+        classroomId: schedule.classroomId,
+        dayOfWeek: schedule.dayOfWeek,
+        isActive: true,
+        [Op.or]: [
+          // Case 1: New schedule starts during an existing schedule
+          {
+            startTime: { [Op.lte]: schedule.startTime },
+            endTime: { [Op.gt]: schedule.startTime }
+          },
+          // Case 2: New schedule ends during an existing schedule
+          {
+            startTime: { [Op.lt]: schedule.endTime },
+            endTime: { [Op.gte]: schedule.endTime }
+          },
+          // Case 3: New schedule completely contains an existing schedule
+          {
+            startTime: { [Op.gte]: schedule.startTime },
+            endTime: { [Op.lte]: schedule.endTime }
+          }
+        ]
+      },
+      transaction: options.transaction
+    });
+    
+    if (conflictingSchedules.length > 0) {
+      throw new Error('Schedule conflicts with existing bookings for this classroom');
+    }
+  }
   
   return Schedule;
 };

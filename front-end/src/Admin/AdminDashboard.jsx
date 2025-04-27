@@ -16,6 +16,10 @@ export const AdminDashboard = () => {
             assignments: 0,
             announcements: 0,
             parents: 0
+        },
+        admin: {
+            fullName: '',
+            email: ''
         }
     });
 
@@ -84,13 +88,15 @@ export const AdminDashboard = () => {
             <Title title="Admin Dashboard" />
 
             <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-                <Typography variant="h4">Welcome, {identity?.fullName}</Typography>
+                <Typography variant="h4">
+                    Welcome, {dashboardData?.admin?.fullName || 'Admin'}
+                </Typography>
                 <Typography variant="subtitle1" color="textSecondary">{currentDate}</Typography>
             </Box>
 
             <Card sx={{ mb: 3 }}>
                 <CardContent>
-                    <Typography variant="h5" gutterBottom>users Overview</Typography>
+                    <Typography variant="h5" gutterBottom>Users Overview</Typography>
                     <Grid container spacing={2} sx={{ mt: 1 }}>
                         {stats.map((stat, index) => (
                             <Grid item xs={12} sm={6} md={4} lg={3} key={index}>

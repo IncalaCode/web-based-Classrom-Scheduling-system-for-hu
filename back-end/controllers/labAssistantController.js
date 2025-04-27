@@ -1,11 +1,12 @@
-const { LabAssistant } = require('../models');
+const { LabAssistant, Department } = require('../models');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
+const password = "labAssistant123"
 
 exports.register = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, departmentId } = req.body;
+    const { firstName, lastName, email , departmentId } = req.body;
 
     const existingLabAssistant = await LabAssistant.findOne({ where: { email } });
     if (existingLabAssistant) {
@@ -18,7 +19,7 @@ exports.register = async (req, res) => {
       lastName,
       email,
       password,
-      departmentId,
+      departmentId :departmentId[0],
       role: 'labAssistant'
     });
 
@@ -36,7 +37,8 @@ exports.register = async (req, res) => {
         firstName: labAssistant.firstName,
         lastName: labAssistant.lastName,
         email: labAssistant.email,
-        role: labAssistant.role
+        role: labAssistant.role,
+        departmentId: labAssistant.departmentId
       }
     });
   } catch (error) {
@@ -44,36 +46,103 @@ exports.register = async (req, res) => {
   }
 };
 
-exports.login = async (req, res) => {
+exports.getAllLabAssistants = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const labAssistants = await LabAssistant.findAll({
+      include: [{
+        model: Department,
+        as: 'department'
+      }],
+      attributes: { exclude: ['password'] }
+    });
 
-    const labAssistant = await LabAssistant.findOne({ where: { email } });
+    return res.status(200).json({
+      data: labAssistants,
+      count: labAssistants.length
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getLabAssistant = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const labAssistant = await LabAssistant.findByPk(id, {
+      include: [{
+        model: Department,
+        as: 'department'
+      }],
+      attributes: { exclude: ['password'] }
+    });
+
     if (!labAssistant) {
       return res.status(404).json({ message: 'Lab Assistant not found' });
     }
 
-    const isPasswordValid = await labAssistant.validatePassword(password);
-    if (!isPasswordValid) {
-      return res.status(401).json({ message: 'Invalid password' });
+    return res.status(200).json({
+      data: labAssistant
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+exports.updateLabAssistant = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { firstName, lastName, email, departmentId } = req.body;
+
+    const labAssistant = await LabAssistant.findByPk(id);
+    if (!labAssistant) {
+      return res.status(404).json({ message: 'Lab Assistant not found' });
     }
 
-    const token = jwt.sign(
-      { id: labAssistant.id, role: labAssistant.role },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
+    if (email && email !== labAssistant.email) {
+      const existingLabAssistant = await LabAssistant.findOne({ where: { email } });
+      if (existingLabAssistant) {
+        return res.status(400).json({ message: 'Email already in use' });
+      }
+    }
+
+    await labAssistant.update({
+      firstName,
+      lastName,
+      email,
+      departmentId :departmentId[0]
+    });
+
+    const updatedLabAssistant = await LabAssistant.findByPk(id, {
+      include: [{
+        model: Department,
+        as: 'department'
+      }],
+      attributes: { exclude: ['password'] }
+    });
 
     return res.status(200).json({
-      message: 'Login successful',
-      token,
-      user: {
-        id: labAssistant.id,
-        firstName: labAssistant.firstName,
-        lastName: labAssistant.lastName,
-        email: labAssistant.email,
-        role: labAssistant.role
-      }
+      message: 'Lab Assistant updated successfully',
+      data: updatedLabAssistant
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+exports.deleteLabAssistant = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const labAssistant = await LabAssistant.findByPk(id);
+    if (!labAssistant) {
+      return res.status(404).json({ message: 'Lab Assistant not found' });
+    }
+
+    await labAssistant.destroy();
+
+    return res.status(200).json({
+      message: 'Lab Assistant deleted successfully'
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });

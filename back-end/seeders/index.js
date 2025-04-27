@@ -1,3 +1,4 @@
+
 'use strict';
 const bcrypt = require('bcryptjs');
 const { v4: uuidv4 } = require('uuid');
@@ -30,167 +31,170 @@ async function seed() {
 
     // Get QueryInterface
     const queryInterface = sequelize.getQueryInterface();
-
-    // 1. Create Admin
+    
+    // Generate timestamp to make emails unique for each run
+    const timestamp = Date.now();
+    
+    // 1. Create Admin if not exists
     console.log('Creating Admin user...');
-    const salt = await bcrypt.genSalt(10);
-    const adminPassword = await bcrypt.hash('admin123', salt);
+    const adminEmail = `admin_${timestamp}@example.com`;
     
-    const adminId = uuidv4();
-    await queryInterface.bulkInsert('Admins', [{
-      id: adminId,
-      firstName: 'System',
-      lastName: 'Administrator',
-      email: 'admin@example.com',
-      password: adminPassword,
-      role: 'admin',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }], {});
-    console.log('Admin created successfully with ID:', adminId);
+    // Check if admin already exists with this email
+    const existingAdmins = await sequelize.query(
+      `SELECT * FROM Admins WHERE email = '${adminEmail}'`,
+      { type: sequelize.QueryTypes.SELECT }
+    );
     
-    // 2. Create Facilitator
+    let adminId;
+    if (existingAdmins.length === 0) {
+      const salt = await bcrypt.genSalt(10);
+      const adminPassword = await bcrypt.hash('admin123', salt);
+      
+      adminId = uuidv4();
+      await queryInterface.bulkInsert('Admins', [{
+        id: adminId,
+        firstName: 'System',
+        lastName: 'Administrator',
+        email: adminEmail,
+        password: adminPassword,
+        role: 'admin',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }], {});
+      console.log('Admin created successfully with ID:', adminId);
+    } else {
+      adminId = existingAdmins[0].id;
+      console.log('Admin already exists with ID:', adminId);
+    }
+    
+    // 2. Create Facilitator if not exists
     console.log('Creating Facilitator user...');
-    const facilitatorPassword = await bcrypt.hash('facilitator123', salt);
+    const facilitatorEmail = `facilitator_${timestamp}@example.com`;
     
-    const facilitatorId = uuidv4();
-    await queryInterface.bulkInsert('Facilitators', [{
-      id: facilitatorId,
-      firstName: 'Main',
-      lastName: 'Facilitator',
-      email: 'facilitator@example.com',
-      password: facilitatorPassword,
-      role: 'facilitator',
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }], {});
-    console.log('Facilitator created successfully with ID:', facilitatorId);
+    // Check if facilitator already exists with this email
+    const existingFacilitators = await sequelize.query(
+      `SELECT * FROM Facilitators WHERE email = '${facilitatorEmail}'`,
+      { type: sequelize.QueryTypes.SELECT }
+    );
     
-    // 3. Create Departments
-    console.log('Creating Departments...');
-    const departmentData = [
-      { name: 'Computer Science', code: 'CS' },
-      { name: 'Electrical Engineering', code: 'EE' },
-      { name: 'Mechanical Engineering', code: 'ME' },
-      { name: 'Civil Engineering', code: 'CE' }
-    ];
+    let facilitatorId;
+    if (existingFacilitators.length === 0) {
+      const salt = await bcrypt.genSalt(10);
+      const facilitatorPassword = await bcrypt.hash('facilitator123', salt);
+      
+      facilitatorId = uuidv4();
+      await queryInterface.bulkInsert('Facilitators', [{
+        id: facilitatorId,
+        firstName: 'Main',
+        lastName: 'Facilitator',
+        email: facilitatorEmail,
+        password: facilitatorPassword,
+        role: 'facilitator',
+        FacilitatorName: 'Main Facilitator',
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }], {});
+      console.log('Facilitator created successfully with ID:', facilitatorId);
+    } else {
+      facilitatorId = existingFacilitators[0].id;
+      console.log('Facilitator already exists with ID:', facilitatorId);
+    }
     
-    const departments = departmentData.map(dept => {
-      const id = uuidv4();
-      return {
-        id,
-        name: dept.name,
-        code: dept.code,
+    // 3. Create Department if not exists
+    console.log('Creating Department...');
+    const departmentName = `Computer Science ${timestamp}`;
+    
+    // Check if department already exists with this name
+    const existingDepartments = await sequelize.query(
+      `SELECT * FROM Departments WHERE name = '${departmentName}'`,
+      { type: sequelize.QueryTypes.SELECT }
+    );
+    
+    let departmentId;
+    if (existingDepartments.length === 0) {
+      departmentId = uuidv4();
+      await queryInterface.bulkInsert('Departments', [{
+        id: departmentId,
+        name: departmentName,
         facilitatorId: facilitatorId,
         createdAt: new Date(),
         updatedAt: new Date()
-      };
-    });
+      }], {});
+      console.log('Department created successfully with ID:', departmentId);
+    } else {
+      departmentId = existingDepartments[0].id;
+      console.log('Department already exists with ID:', departmentId);
+    }
     
-    await queryInterface.bulkInsert('Departments', departments, {});
-    console.log('Departments created successfully');
+    // 4. Create Department Head if not exists
+    console.log('Creating Department Head...');
+    const departmentHeadEmail = `depthead_${timestamp}@example.com`;
     
-    // 4. Create Department Heads
-    console.log('Creating Department Heads...');
-    const departmentHeadPassword = await bcrypt.hash('depthead123', salt);
+    // Check if department head already exists with this email
+    const existingDepartmentHeads = await sequelize.query(
+      `SELECT * FROM DepartmentHeads WHERE email = '${departmentHeadEmail}'`,
+      { type: sequelize.QueryTypes.SELECT }
+    );
     
-    const departmentHeads = [];
-    for (let i = 0; i < departments.length; i++) {
-      const department = departments[i];
-      const deptName = department.name.replace(/\s+/g, '').toLowerCase();
+    let departmentHeadId;
+    if (existingDepartmentHeads.length === 0) {
+      const salt = await bcrypt.genSalt(10);
+      const departmentHeadPassword = await bcrypt.hash('depthead123', salt);
       
-      departmentHeads.push({
-        id: uuidv4(),
-        firstName: department.name.split(' ')[0],
+      departmentHeadId = uuidv4();
+      await queryInterface.bulkInsert('DepartmentHeads', [{
+        id: departmentHeadId,
+        firstName: 'Department',
         lastName: 'Head',
-        email: `head.${deptName}@example.com`,
+        email: departmentHeadEmail,
         password: departmentHeadPassword,
-        departmentId: department.id,
+        departmentId: departmentId,
         role: 'departmentHead',
         createdAt: new Date(),
         updatedAt: new Date()
-      });
+      }], {});
+      console.log('Department Head created successfully with ID:', departmentHeadId);
+    } else {
+      departmentHeadId = existingDepartmentHeads[0].id;
+      console.log('Department Head already exists with ID:', departmentHeadId);
     }
     
-    await queryInterface.bulkInsert('DepartmentHeads', departmentHeads, {});
-    console.log('Department Heads created successfully');
+    // 5. Create a Classroom
+    console.log('Creating Classroom...');
+    const classroomName = `Room-${timestamp.toString().slice(-4)}`;
     
-    // 5. Create an Instructor for each department
-    console.log('Creating Instructors...');
-    const instructorPassword = await bcrypt.hash('instructor123', salt);
+    // Check if classroom already exists with this name
+    const existingClassrooms = await sequelize.query(
+      `SELECT * FROM Classrooms WHERE roomName = '${classroomName}' AND departmentId = '${departmentId}'`,
+      { type: sequelize.QueryTypes.SELECT }
+    );
     
-    const instructors = [];
-    for (let i = 0; i < departments.length; i++) {
-      const department = departments[i];
-      const deptName = department.name.replace(/\s+/g, '').toLowerCase();
-      
-      instructors.push({
-        id: uuidv4(),
-        firstName: 'Instructor',
-        lastName: department.name.split(' ')[0],
-        email: `instructor.${deptName}@example.com`,
-        password: instructorPassword,
-        departmentId: department.id,
-        role: 'instructor',
+    if (existingClassrooms.length === 0) {
+      const classroomId = uuidv4();
+      await queryInterface.bulkInsert('Classrooms', [{
+        id: classroomId,
+        building: 'Main Building',
+        floor: 2,
+        roomName: classroomName,
+        roomDescription: 'Standard classroom with projector',
+        classRoomInterval: JSON.stringify([101, 102]),
+        type: 'classroom',
+        capacity: 30,
+        equipment: JSON.stringify({
+          projector: true,
+          computers: 0,
+          whiteboard: true
+        }),
+        isAvailableForAllocation: true,
+        departmentId: departmentId,
+        facilitatorId: facilitatorId,
         createdAt: new Date(),
         updatedAt: new Date()
-      });
+      }], {});
+      console.log('Classroom created successfully with ID:', classroomId);
+    } else {
+      console.log('Classroom already exists with ID:', existingClassrooms[0].id);
     }
-    
-    await queryInterface.bulkInsert('Instructors', instructors, {});
-    console.log('Instructors created successfully');
-    
-    // 6. Create a Lab Assistant for each department
-    console.log('Creating Lab Assistants...');
-    const labAssistantPassword = await bcrypt.hash('labassistant123', salt);
-    
-    const labAssistants = [];
-    for (let i = 0; i < departments.length; i++) {
-      const department = departments[i];
-      const deptName = department.name.replace(/\s+/g, '').toLowerCase();
-      
-      labAssistants.push({
-        id: uuidv4(),
-        firstName: 'Lab',
-        lastName: 'Assistant',
-        email: `lab.${deptName}@example.com`,
-        password: labAssistantPassword,
-        departmentId: department.id,
-        role: 'labAssistant',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-    }
-    
-    await queryInterface.bulkInsert('LabAssistants', labAssistants, {});
-    console.log('Lab Assistants created successfully');
-    
-    // 7. Create a Student for each department
-    console.log('Creating Students...');
-    const studentPassword = await bcrypt.hash('student123', salt);
-    
-    const students = [];
-    for (let i = 0; i < departments.length; i++) {
-      const department = departments[i];
-      const deptName = department.name.replace(/\s+/g, '').toLowerCase();
-      
-      students.push({
-        id: uuidv4(),
-        firstName: 'Student',
-        lastName: department.name.split(' ')[0],
-        email: `student.${deptName}@example.com`,
-        password: studentPassword,
-        year: 2,
-        semester: 1,
-        departmentId: department.id,
-        role: 'student',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      });
-    }
-    
-    await queryInterface.bulkInsert('Students', students, {});
-    console.log('Students created successfully');
     
     console.log('All seed data created successfully!');
     

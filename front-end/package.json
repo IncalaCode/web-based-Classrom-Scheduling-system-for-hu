@@ -20,6 +20,7 @@
     "react": "^19.0.0",
     "react-admin": "^5.7.0",
     "react-dom": "^19.0.0",
+    "react-to-print": "^3.0.6",
     "recharts": "^2.15.1",
     "tailwindcss": "^4.1.0"
   },

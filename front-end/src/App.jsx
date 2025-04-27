@@ -1,14 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Admin, Resource } from "react-admin";
+import { Admin } from "react-admin";
+import { useLocation } from "react-router-dom";
 import dataProvider from "./hooks/dataProvider";
 import authProvider from "./hooks/authProvider";
 import { CustomLayout } from "./layout/CustomLayout";
 import LoginPage from "./Auth/LoginPage";
-import { getResources, DashboardSelector } from "./layout/resources";
+import { getResources } from "./layout/resources";
 import { Loading } from "./components/Loading";
 
 const App = () => {
   const [role, setRole] = useState(null);
+  const [key, setKey] = useState(Date.now());
   
   const getUserRole = () => {
     try {
@@ -29,7 +31,6 @@ const App = () => {
         await authProvider.checkAuth();
         const userRole = getUserRole();
         setRole(userRole);
-        console.log("User role set to:", userRole);
       } catch (error) {
         console.error("Auth check failed:", error);
         setRole(null);
@@ -41,7 +42,8 @@ const App = () => {
     const handleStorageChange = () => {
       const userRole = getUserRole();
       setRole(userRole);
-      console.log("Storage changed, user role updated to:", userRole);
+      // Force refresh when auth changes
+      setKey(Date.now());
     };
     
     window.addEventListener('storage', handleStorageChange);
@@ -51,11 +53,21 @@ const App = () => {
     };
   }, []);
   
+  const RefreshOnNavigate = () => {
+    const location = useLocation();
+    
+    useEffect(() => {
+      setKey(Date.now());
+    }, [location.pathname]);
+    
+    return null;
+  };
+  
   return (
     <Admin
+      key={key}
       dataProvider={dataProvider}
       authProvider={authProvider}
-      dashboard={DashboardSelector}
       layout={CustomLayout}
       loginPage={LoginPage}
       defaultTheme={false}
@@ -65,15 +77,17 @@ const App = () => {
     >
       {() => {
         const currentRole = role || getUserRole();
-        console.log("Rendering resources for role:", currentRole);
         
         if (!currentRole) {
-          return [<Resource key="dummy" name="dummy" />];
+          return null;
         }
         
-        const resources = getResources(currentRole);
-        console.log("Resources to render:", resources.length);
-        return resources;
+        return (
+          <>
+            <RefreshOnNavigate />
+            {getResources(currentRole)}
+          </>
+        );
       }}
     </Admin>
   );

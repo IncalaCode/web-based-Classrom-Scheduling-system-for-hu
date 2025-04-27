@@ -15,6 +15,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'facilitatorId',
         as: 'departments'
       });
+      
+      // Add the missing association to Classroom
+      Facilitator.hasMany(models.Classroom, {
+        foreignKey: 'facilitatorId',
+        as: 'classrooms'
+      });
     }
 
     // Method to check if password matches
@@ -40,6 +46,15 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     lastName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        notEmpty: {
+          msg: 'Last name is required'
+        }
+      }
+    },
+    FacilitatorName: {
       type: DataTypes.STRING,
       allowNull: false,
       validate: {

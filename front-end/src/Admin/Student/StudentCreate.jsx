@@ -1,30 +1,39 @@
 
 // src/components/DepartmentFileCreate.tsx
 import React from "react";
-import { Create, SimpleForm, TextInput, SelectInput, required } from "react-admin";
+import { Create, SimpleForm, TextInput, ReferenceArrayInput, required, SelectArrayInput ,minLength ,maxLength} from "react-admin";
 
 const StudentCreate = () => {
-  const gradeChoices = [
-    { id: '9', name: 'Grade 9' },
-    { id: '10', name: 'Grade 10' },
-  ];
 
   return (
     <Create>
       <SimpleForm>
         <TextInput source="firstName" label="First Name" fullWidth validate={[required()]} />
         <TextInput source="lastName" label="Last Name" fullWidth validate={[required()]} />
-        <TextInput source="student_id" label="Student Id" defaultValue="1746/14" fullWidth validate={[required()]} />
         <TextInput source="email" label="Email" fullWidth validate={[required()]} />
-        <TextInput source="dateOfBirth" type="date" label="Date Of Birth" fullWidth validate={[required()]} />
-        <TextInput source="enrollmentDate" type="date" label="Enrollment Date" fullWidth validate={[required()]} />
-        <SelectInput 
-          source="grade" 
-          label="Grade" 
-          choices={gradeChoices} 
-          fullWidth 
-          validate={[required()]} 
-        />
+        <TextInput source="semester" type="number" label="semester" fullWidth validate={[required() ,maxLength(2) ,minLength(1)]} />
+        <TextInput source="year" type="number" label="year" fullWidth validate={[required(),maxLength(6) ,minLength(1)]} />
+        <ReferenceArrayInput 
+          source="departmentId" 
+          reference="department" 
+          label="Children"
+          filter={{ isActive: true }}
+        >
+          <SelectArrayInput 
+            optionText={(record) => 
+              record ? `${record.name}` : ''
+            }
+            filter={{ isActive: true }}
+            filterToQuery={searchText => ({
+              q: searchText,
+              _sort: 'name',
+              _order: 'ASC',
+            })}
+            fullWidth
+            label="Select department"
+            validate={required()}
+          />
+        </ReferenceArrayInput>
       </SimpleForm>
     </Create>
   );

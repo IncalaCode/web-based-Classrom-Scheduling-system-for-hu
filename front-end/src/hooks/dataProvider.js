@@ -1,89 +1,83 @@
 import { fetchUtils } from 'react-admin';
 import { API_ENDPOINT_FUNCTION, GET_HEADER } from "../config/config";
-import extendedDataProvider from './dataProviderExtensions';
-
 
 const get_path_list = {
-    students: "/students",
-    teachers : "/teachers",
-    parents : "/parents",
-    course : "/courses",
-    Notfication : "/notifications",
-    CourseMaterial : "/CourseMaterial",
-    courseEnrollments : "/courseenrollments" ,
-    Assessment : "/Assessment/teacher",
-    attendance: "/Attendance",
+    departmentHeads: "/department-heads",
+    facilitators : "/facilitators",
+    students : "/students",
+    labAssistants : "/labAssistants",
+    department : "/department",
+    instructors  : "/instructors",
+    courses : "/courses",
+    Allocation : "/classrooms",
+    schedule : "/schedules",
+    AllocationByDepartment : "/classrooms/dep",
+    feedbacks : "/feedbacks",
+    userSchedules: "/users/schedules",
 };
 
 const create_path = {
-    students: "/students/register",
-    teachers :"/teachers/register",
-    parents : "/parents/register",
-    course : "/courses",
-    CourseMaterial : "/CourseMaterial",
-    "attendance/attendance/bulk": "/attendance/bulk"
+    departmentHeads: "/department-heads/register",
+    facilitators : "/facilitators/register",
+    students : "/students/register",
+    labAssistants : "/labAssistants/register",
+    instructors  : "/instructors/register",
+    courses : "/courses",
+    Allocation : "/classrooms",
+    schedule : "/schedules",
+    feedbacks : "/feedbacks",
 };
 
 const get_one_path = {  
-    students: "/students/profile",
-    teachers : "/teachers/profile",
-    parents : "/parents/profile",
-    course : "/courses",
-    CourseMaterial : "/CourseMaterial",
-    Assessment : "/Assessment"
-
+    departmentHeads: "/department-heads",
+    facilitators : "/facilitators",
+    students : "/students",
+    labAssistants : "/labAssistants",
+    department : "/department",
+    instructors  : "/instructors",
+    courses : "/courses",
+    Allocation : "/classrooms",
+    schedule : "/schedules",
+    feedbacks : "/feedbacks",
+    
 };
 
-
 const delete_path = {
-    students: "/students",
-    teachers : "/teachers",
-    parents : "/parents",
-    course  : "/courses",
-    CourseMaterial : "/CourseMaterial",
-    Assessment : "/Assessment"
+    departmentHeads: "/department-heads",
+    facilitators :"/facilitators",
+    students : "/students",
+    labAssistants : "/labAssistants",
+    instructors  : "/instructors",
+    courses : "/courses",
+    Allocation : "/classrooms",
+    schedule : "/schedules",
+    feedbacks : "/feedbacks",
 };
 
 const update_path = {
-    students: "/students/update",
-    teachers : "/teachers/update",
-    parents : "/parents/update",
-    course : "/courses",
-        CourseMaterial : "/CourseMaterial"
+    departmentHeads: "/department-heads",
+    facilitators : "/facilitators",
+    students : "/students",
+    labAssistants : "/labAssistants",
+    instructors  : "/instructors",
+    courses : "/courses",
+    Allocation : "/classrooms",
+    schedule : "/schedules",
+    feedbacks : "/feedbacks",
 };
 
-const get_one_dashboard_path = {
+const dashboard_path = {
     Admindashboard : "/dashboard/admin"
 }
 
-const get_update_password = {
-    default : "/auth/update-password"
-}
-
-
 const dataProvider = {
     getList: async (resource, params) => {
-        // Special handling for attendance resources
-        if (resource === 'attendance') {
-            // For fetching attendance records by course and date
-            const { courseId, date } = params.filter || {};
-            if (courseId && date) {
-                const url = `${API_ENDPOINT_FUNCTION('/attendance/records')}?courseId=${courseId}&date=${date}`;
-                const options = await GET_HEADER();
-                
-                return fetchUtils.fetchJson(url, { ...options }).then(({ json }) => ({
-                    data: json.data || [],
-                    total: json.total || 0,
-                }));
-            }
-        }
-        
         const url = API_ENDPOINT_FUNCTION(get_path_list[resource]);
         const options = await GET_HEADER();
         
         return fetchUtils.fetchJson(url, { ...options }).then(({ headers, json }) => ({
-            data: json.data,
-            total: parseInt(headers.get('content-range')?.split('/')?.pop(), 10) || json.length,
+            data: json.data || [],
+            total: parseInt(headers.get('content-range')?.split('/')?.pop(), 10) || json.count,
         }));
     },
 
@@ -96,20 +90,6 @@ const dataProvider = {
         }));
     },
 
-    getMany: async (resource, params) => {
-        const url = API_ENDPOINT_FUNCTION(get_path_list[resource]);
-        const options = await GET_HEADER();
-        
-        return fetchUtils.fetchJson(url, { ...options }).then(({ json }) => {
-            const filteredData = Array.isArray(json.data) 
-                ? json.data.filter(item => params.ids.includes(item.id))
-                : [];
-            
-            return {
-                data: filteredData,
-            };
-        });
-    },
     create: async (resource, params) => {
         const url = API_ENDPOINT_FUNCTION(create_path[resource]);
         const options = await GET_HEADER({
@@ -118,7 +98,7 @@ const dataProvider = {
         });
         
         return fetchUtils.fetchJson(url, { ...options }).then(({ json }) => ({
-            data: { ...params.data, id: json.id },
+            data: { ...params.data, id: json?.user?.id },
         }));
     },
     
@@ -130,7 +110,7 @@ const dataProvider = {
         });
         
         return fetchUtils.fetchJson(url, { ...options }).then(({ json }) => ({
-            data: json.data,
+            data: json?.data,
         }));
     },
     
@@ -141,70 +121,55 @@ const dataProvider = {
         });
         
         return fetchUtils.fetchJson(url, { ...options }).then(({ json }) => ({
-            data: json,
-        }));
-    },
-    getDashboard : async (resource ,params) =>{
-        const url = API_ENDPOINT_FUNCTION(get_one_dashboard_path[resource]);
-        const options = await GET_HEADER();
-        
-        return fetchUtils.fetchJson(url, { ...options }).then(({ json }) => ({
-            data: json.data,
+            data: { id: params.id },
         }));
     },
 
-    updatePassword: async (params) => {
-        const { oldPassword, newPassword, confirmPassword } = params.data;
-        const url = API_ENDPOINT_FUNCTION(get_update_password.default);
-        const options = await GET_HEADER({
-            method: 'PUT',
-            body: JSON.stringify({ oldPassword, newPassword, confirmPassword }),
+    getMany: async (resource, params) => {
+        const url = API_ENDPOINT_FUNCTION(get_path_list[resource]);
+        const options = await GET_HEADER();
+        
+        return fetchUtils.fetchJson(url, { ...options }).then(({ json }) => {
+            const filteredData = Array.isArray(json.departmentHeads) 
+                ? json.departmentHeads.filter(item => params.ids.includes(item.id))
+                : [];
+            
+            return {
+                data: filteredData,
+            };
         });
-        return fetchUtils.fetchJson(url, { ...options }).then(({ json }) => ({
-            data: json.data,
-        }));
-      },
-      // Custom methods for attendance management
-      getAttendanceByDate: async (courseId, date) => {
-          const url = `${API_ENDPOINT_FUNCTION('/attendance/records')}?courseId=${courseId}&date=${date}`;
-          const options = await GET_HEADER();
-          
-          return fetchUtils.fetchJson(url, { ...options }).then(({ json }) => ({
-              data: json.data || [],
-          }));
-      },
-      
-      getTeacherCourses: async () => {
-          const url = API_ENDPOINT_FUNCTION('/attendance/teacher/courses');
-          const options = await GET_HEADER();
-          
-          return fetchUtils.fetchJson(url, { ...options }).then(({ json }) => ({
-              data: json.data || [],
-          }));
-      },
-      
-      getStudentsForAttendance: async (courseId) => {
-          const url = `${API_ENDPOINT_FUNCTION('/attendance/teacher/students')}?courseId=${courseId}`;
-          const options = await GET_HEADER();
-          
-          return fetchUtils.fetchJson(url, { ...options }).then(({ json }) => ({
-              data: json.data || [],
-          }));
-      },
-      
-      bulkMarkAttendance: async (data) => {
-          const url = API_ENDPOINT_FUNCTION('/attendance/bulk');
-          const options = await GET_HEADER({
-              method: 'POST',
-              body: JSON.stringify(data)
-          });
-          
-          return fetchUtils.fetchJson(url, { ...options }).then(({ json }) => ({
-              data: json.data || {},
-          }));
-      },
-      
-      ...extendedDataProvider
+    
+    },
+
+    getDashboard: async (resource) => {
+        const url =  API_ENDPOINT_FUNCTION(dashboard_path[resource]);
+        const options = await GET_HEADER();
+
+        return fetchUtils.fetchJson(url, options)
+            .then(({ json }) => ({
+                data: json.data
+            }))
+            .catch(error => {
+                console.error('Error fetching dashboard data:', error);
+                throw error;
+            });
+    },
+
+    getUserSchedules: async (userType) => {
+        const url = `${API_ENDPOINT_FUNCTION(get_path_list.userSchedules)}?user=${userType}`;
+        const options = await GET_HEADER();
+
+        return fetchUtils.fetchJson(url, options)
+            .then(({ json }) => ({
+                data: json.data || [],
+                count: json.count || 0,
+                success: json.success
+            }))
+            .catch(error => {
+                console.error('Error fetching user schedules:', error);
+                throw error;
+            });
+    }
 };
 
 export default dataProvider;

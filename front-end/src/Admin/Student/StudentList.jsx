@@ -18,8 +18,8 @@ const StudentList = () => (
       <TextField source="lastName" label="Last Name" />
       <TextField source="student_id" label="student Id" />
       <TextField source="email" label="Email" />
-      <TextField source="enrollmentDate" label="Enrollment Date" />
-      <TextField source="grade" label="Grade" />
+      <TextField source="semester" label="semester" />
+      <TextField source="year" label="year" />
       <EditButton />
       <DeleteButton />
     </Datagrid>

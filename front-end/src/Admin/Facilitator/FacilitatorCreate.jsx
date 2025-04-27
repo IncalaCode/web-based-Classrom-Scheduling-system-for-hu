@@ -3,25 +3,29 @@ import {
   Create, 
   SimpleForm, 
   TextInput, 
-  SelectInput, 
-  ReferenceArrayInput, 
-  SelectArrayInput,
+  PasswordInput,
   required,
   email,
-  minLength
+  minLength,
 } from "react-admin";
+import { useParams } from 'react-router-dom';
 
-const relationChoices = [
-  { id: 'father', name: 'Father' },
-  { id: 'mother', name: 'Mother' },
-  { id: 'guardian', name: 'Guardian' },
-  { id: 'other', name: 'Other' }
-];
+const validatePassword = [required(), minLength(6, 'Password must be at least 6 characters')];
 
-const ParentCreate = () => {
+const validateFacilitatorName = (value) => {
+  if (!value) {
+    return 'Facilitator name is required';
+  }
+  if (!/^[A-Z][a-zA-Z\s]*$/.test(value)) {
+    return 'Facilitator name must start with a capital letter and contain only letters and spaces';
+  }
+  return undefined;
+};
+
+const FacilitatorCreate = () => {
   return (
-    <Create>
-      <SimpleForm>
+    <Create redirect="/facilitators">
+      <SimpleForm >
         <TextInput 
           source="firstName" 
           label="First Name" 
@@ -35,60 +39,27 @@ const ParentCreate = () => {
           validate={[required()]} 
         />
         <TextInput 
+          source="FacilitatorName" 
+          label="Facilitator Name" 
+          fullWidth 
+          validate={validateFacilitatorName}
+          helperText="Must start with a capital letter and contain only letters and spaces"
+        />
+        <TextInput 
           source="email" 
           label="Email" 
           fullWidth 
           validate={[required(), email()]} 
         />
-        <TextInput 
-          source="address" 
-          label="Address" 
-          fullWidth 
-          validate={[required()]} 
+        <PasswordInput
+          source="password"
+          label="Password"
+          fullWidth
+          validate={validatePassword}
         />
-        <TextInput 
-          source="phone" 
-          type="tel" 
-          label="Phone Number" 
-          fullWidth 
-          validate={[required()]} 
-        />
-        <SelectInput 
-          source="relation" 
-          label="Relation" 
-          choices={relationChoices} 
-          fullWidth 
-          validate={[required()]} 
-        />
-        <TextInput 
-          source="occupation" 
-          label="Occupation" 
-          fullWidth 
-        />
-        <ReferenceArrayInput 
-          source="studentIds" 
-          reference="students" 
-          label="Children"
-          filter={{ isActive: true }}
-        >
-          <SelectArrayInput 
-            optionText={(record) => 
-              record ? `${record.firstName} ${record.lastName} (Grade: ${record.grade})` : ''
-            }
-            filter={{ isActive: true }}
-            filterToQuery={searchText => ({
-              q: searchText,
-              _sort: 'firstName',
-              _order: 'ASC',
-            })}
-            fullWidth
-            label="Select Students"
-            helperText="Search by student name"
-          />
-        </ReferenceArrayInput>
       </SimpleForm>
     </Create>
   );
 };
 
-export default ParentCreate;
+export default FacilitatorCreate;

@@ -4,25 +4,30 @@ import {
   Datagrid, 
   TextField, 
   EditButton, 
-  DeleteButton, 
+  DeleteButton,
+  ReferenceField
 } from "react-admin";
 
-const TeacherList = () => (
+const DepartmentHeadList = () => (
   <List 
-    sort={{ field: 'created_at', order: 'DESC' }}
+    sort={{ field: 'createdAt', order: 'DESC' }}
     perPage={25}
   >
-    <Datagrid
-    >
-        <TextField source="firstName" label="First Name"  />
-        <TextField source="lastName" label="Last Name"  />
-        <TextField source="email" label="Email"  />
-        <TextField source="grade" label="Grade"  />
-        <TextField source="phone" type="tel" label="phone Number"  />
+    <Datagrid>
+        <TextField source="firstName" label="First Name" />
+        <TextField source="lastName" label="Last Name" />
+        <TextField source="email" label="Email" />
+        {/* <ReferenceField
+          source="departmentId"
+          reference="departments"
+          label="Department"
+        >
+          <TextField source="name" />
+        </ReferenceField> */}
       <EditButton />
       <DeleteButton />
     </Datagrid>
   </List>
 );
 
-export default TeacherList;
+export default DepartmentHeadList;

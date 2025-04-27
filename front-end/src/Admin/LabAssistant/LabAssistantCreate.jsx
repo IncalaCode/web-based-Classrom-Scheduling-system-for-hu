@@ -8,17 +8,9 @@ import {
   SelectArrayInput,
   required,
   email,
-  minLength
 } from "react-admin";
 
-const relationChoices = [
-  { id: 'father', name: 'Father' },
-  { id: 'mother', name: 'Mother' },
-  { id: 'guardian', name: 'Guardian' },
-  { id: 'other', name: 'Other' }
-];
-
-const ParentCreate = () => {
+const LabAssistantCreate = () => {
   return (
     <Create>
       <SimpleForm>
@@ -40,50 +32,26 @@ const ParentCreate = () => {
           fullWidth 
           validate={[required(), email()]} 
         />
-        <TextInput 
-          source="address" 
-          label="Address" 
-          fullWidth 
-          validate={[required()]} 
-        />
-        <TextInput 
-          source="phone" 
-          type="tel" 
-          label="Phone Number" 
-          fullWidth 
-          validate={[required()]} 
-        />
-        <SelectInput 
-          source="relation" 
-          label="Relation" 
-          choices={relationChoices} 
-          fullWidth 
-          validate={[required()]} 
-        />
-        <TextInput 
-          source="occupation" 
-          label="Occupation" 
-          fullWidth 
-        />
+
         <ReferenceArrayInput 
-          source="studentIds" 
-          reference="students" 
+          source="departmentId" 
+          reference="department" 
           label="Children"
           filter={{ isActive: true }}
         >
           <SelectArrayInput 
             optionText={(record) => 
-              record ? `${record.firstName} ${record.lastName} (Grade: ${record.grade})` : ''
+              record ? `${record.name}` : ''
             }
             filter={{ isActive: true }}
             filterToQuery={searchText => ({
               q: searchText,
-              _sort: 'firstName',
+              _sort: 'name',
               _order: 'ASC',
             })}
             fullWidth
-            label="Select Students"
-            helperText="Search by student name"
+            label="Select department"
+            validate={required()}
           />
         </ReferenceArrayInput>
       </SimpleForm>
@@ -91,4 +59,4 @@ const ParentCreate = () => {
   );
 };
 
-export default ParentCreate;
+export default LabAssistantCreate;

@@ -1,88 +1,57 @@
 import React from "react";
-import {   Edit,
+import {   
+  Edit,
   SimpleForm, 
-  TextInput, 
-  SelectInput, 
-  ReferenceArrayInput, 
-  SelectArrayInput,
+  TextInput,
+  required,
+  email,
 } from "react-admin";
-const relationChoices = [
-  { id: 'father', name: 'Father' },
-  { id: 'mother', name: 'Mother' },
-  { id: 'guardian', name: 'Guardian' },
-  { id: 'other', name: 'Other' }
-];
-const parentEdit = (props) => {
+import { useParams } from 'react-router-dom';
+
+const validateFacilitatorName = (value) => {
+  if (!value) {
+    return 'Facilitator name is required';
+  }
+  if (!/^[A-Z][a-zA-Z\s]*$/.test(value)) {
+    return 'Facilitator name must start with a capital letter and contain only letters and spaces';
+  }
+  return undefined;
+};
+
+const FacilitatorEdit = () => {
+  const { id } = useParams();
+
   return (
-    <Edit {...props}>
+    <Edit id={id} resource="facilitators">
       <SimpleForm>
-                <TextInput 
-                  source="firstName" 
-                  label="First Name" 
-                  fullWidth 
-                 
-                />
-                <TextInput 
-                  source="lastName" 
-                  label="Last Name" 
-                  fullWidth 
-                 
-                />
-                <TextInput 
-                  source="email" 
-                  label="Email" 
-                  fullWidth 
-                />
-                <TextInput 
-                  source="address" 
-                  label="Address" 
-                  fullWidth 
-                 
-                />
-                <TextInput 
-                  source="phone" 
-                  type="tel" 
-                  label="Phone Number" 
-                  fullWidth 
-                 
-                />
-                <SelectInput 
-                  source="relation" 
-                  label="Relation" 
-                  choices={relationChoices} 
-                  fullWidth 
-                 
-                />
-                <TextInput 
-                  source="occupation" 
-                  label="Occupation" 
-                  fullWidth 
-                />
-                <ReferenceArrayInput 
-                  source="studentIds" 
-                  reference="students" 
-                  label="Children"
-                  filter={{ isActive: true }}
-                >
-                  <SelectArrayInput 
-                    optionText={(record) => 
-                      record ? `${record.firstName} ${record.lastName} (Grade: ${record.grade})` : ''
-                    }
-                    filter={{ isActive: true }}
-                    filterToQuery={searchText => ({
-                      q: searchText,
-                      _sort: 'firstName',
-                      _order: 'ASC',
-                    })}
-                    source="student"
-                    fullWidth
-                    label="Select Students"
-                    helperText="Search by student name"
-                  />
-                </ReferenceArrayInput>
+        <TextInput 
+          source="firstName" 
+          label="First Name" 
+          fullWidth 
+          validate={[required()]}
+        />
+        <TextInput 
+          source="lastName" 
+          label="Last Name" 
+          fullWidth 
+          validate={[required()]}
+        />
+        <TextInput 
+          source="FacilitatorName" 
+          label="Facilitator Name" 
+          fullWidth 
+          validate={validateFacilitatorName}
+          helperText="Must start with a capital letter and contain only letters and spaces"
+        />
+        <TextInput 
+          source="email" 
+          label="Email" 
+          fullWidth 
+          validate={[required(), email()]}
+        />
       </SimpleForm>
     </Edit>
   );
 };
 
-export default parentEdit;
+export default FacilitatorEdit;
