@@ -5,12 +5,11 @@ import { AUTH_ENDPOINTS, TOKEN_ENDPOINTS } from "../config/config";
  * Handles all authentication requests.
  */
 const authProvider = {
-  login: async ({ email, password, userType }) => {
+  login: async ({ email, password }) => {
     try {
       const response = await axios.post(AUTH_ENDPOINTS.LOGIN, {
         email,
         password,
-        userType,
       });
     
       const { token, user } = response.data;

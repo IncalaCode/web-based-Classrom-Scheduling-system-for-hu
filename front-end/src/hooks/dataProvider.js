@@ -169,7 +169,18 @@ const dataProvider = {
                 console.error('Error fetching user schedules:', error);
                 throw error;
             });
-    }
+    },
+
+    updatePassword: async ({ data }) => {
+        const url = API_ENDPOINT_FUNCTION('/auth/update-password');
+        const options = await GET_HEADER({
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
+        return fetchUtils.fetchJson(url, options).then(({ json }) => ({
+            data: json,
+        }));
+    },
 };
 
 export default dataProvider;

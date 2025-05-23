@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
  * Handles the login form state and submission.
  */
 export const useLoginForm = () => {
-  const [activeTab, setActiveTab] = useState(null);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -62,11 +61,9 @@ export const useLoginForm = () => {
     try {
       setLoading(true);
       const loginData = {
-        userType: activeTab,
         email: formData.email,
         password: formData.password,
-      }
-      console.log(loginData)
+      };
       const response = await authProvider.login(loginData);
 
       if (response && response.message) {
@@ -87,8 +84,6 @@ export const useLoginForm = () => {
   };
 
   return {
-    activeTab,
-    setActiveTab,
     formData,
     setFormData,
     errors,

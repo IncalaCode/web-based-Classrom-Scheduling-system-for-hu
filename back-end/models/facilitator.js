@@ -19,7 +19,9 @@ module.exports = (sequelize, DataTypes) => {
       // Add the missing association to Classroom
       Facilitator.hasMany(models.Classroom, {
         foreignKey: 'facilitatorId',
-        as: 'classrooms'
+        as: 'classrooms',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       });
     }
 

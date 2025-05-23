@@ -1,53 +1,43 @@
 const { DepartmentHead, Instructor, LabAssistant, Student, Facilitator, Admin } = require('../models');
 const jwt = require('jsonwebtoken');
 
+// Helper function to find user by email in all models
+async function findUserByEmail(email) {
+  const models = [
+    { model: DepartmentHead, role: 'departmenthead' },
+    { model: Instructor, role: 'instructor' },
+    { model: LabAssistant, role: 'labassistant' },
+    { model: Student, role: 'student' },
+    { model: Facilitator, role: 'facilitator' },
+    { model: Admin, role: 'admin' },
+  ];
+  for (const { model, role } of models) {
+    const user = await model.findOne({ where: { email } });
+    if (user) return { user, role };
+  }
+  return null;
+}
+
 exports.login = async (req, res) => {
   try {
-    const { email, password, userType } = req.body;
-    
-    let user;
-    let model;
-    
-    switch (userType) {
-      case 'departmenthead':
-        model = DepartmentHead;
-        break;
-      case 'instructor':
-        model = Instructor;
-        break;
-      case 'labassistant':
-        model = LabAssistant;
-        break;
-      case 'student':
-        model = Student;
-        break;
-      case 'facilitator':
-        model = Facilitator;
-        break;
-      case 'admin':
-        model = Admin;
-        break;
-      default:
-        return res.status(400).json({ message: 'Invalid user type' });
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
     }
-    
-    user = await model.findOne({ where: { email } });
-    
-    if (!user) {
-      return res.status(404).json({ message: `${userType.charAt(0).toUpperCase() + userType.slice(1)} not found` });
+    const found = await findUserByEmail(email);
+    if (!found) {
+      return res.status(404).json({ message: 'User not found' });
     }
-    
+    const { user, role } = found;
     const isPasswordValid = await user.validatePassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({ message: 'Invalid password' });
     }
-    
     const token = jwt.sign(
-      { id: user.id, role: user.role , email : user.email , firstName : user.firstName },
+      { id: user.id, role: user.role, email: user.email, firstName: user.firstName },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
     );
-    
     const userData = {
       id: user.id,
       firstName: user.firstName,
@@ -55,13 +45,10 @@ exports.login = async (req, res) => {
       email: user.email,
       role: user.role
     };
-    
-    // Add additional fields for student
-    if (userType === 'student') {
+    if (role === 'student') {
       userData.year = user.year;
       userData.semester = user.semester;
     }
-    
     return res.status(200).json({
       message: 'Login successful',
       token,
