@@ -9,6 +9,7 @@ import {
   minLength,
 } from "react-admin";
 import { useParams } from 'react-router-dom';
+import InputVildcation from "../../components/inputvildcation";
 
 const validatePassword = [required(), minLength(6, 'Password must be at least 6 characters')];
 
@@ -31,12 +32,14 @@ const FacilitatorCreate = () => {
           label="First Name" 
           fullWidth 
           validate={[required()]} 
+           parse={value => InputVildcation(value, "letter")}
         />
         <TextInput 
           source="lastName" 
           label="Last Name" 
           fullWidth 
           validate={[required()]} 
+           parse={value => InputVildcation(value, "letter")}
         />
         <TextInput 
           source="FacilitatorName" 

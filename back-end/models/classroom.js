@@ -24,7 +24,9 @@ module.exports = (sequelize, DataTypes) => {
       // Associate with Facilitator model
       Classroom.belongsTo(models.Facilitator, {
         foreignKey: 'facilitatorId',
-        as: 'facilitator'
+        as: 'facilitator',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       });
     }
   }
@@ -124,7 +126,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     facilitatorId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       comment: 'ID of the facilitator who manages this classroom',
       references: {
         model: 'Facilitators',

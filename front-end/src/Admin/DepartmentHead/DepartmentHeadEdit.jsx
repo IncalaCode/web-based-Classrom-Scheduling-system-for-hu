@@ -8,6 +8,7 @@ import {
   email,
   useGetList 
 } from "react-admin";
+import InputVildcation from "../../components/inputvildcation";
 
 // Validation function for department name
 const validateDepartmentName = (value) => {
@@ -47,12 +48,14 @@ const DepartmentHeadEdit = (props) => {
           label="First Name" 
           fullWidth 
           validate={[required()]}
+           parse={value => InputVildcation(value, "letter")}
         />
         <TextInput 
           source="lastName" 
           label="Last Name" 
           fullWidth 
           validate={[required()]}
+           parse={value => InputVildcation(value, "letter")}
         />
         <TextInput 
           source="email" 

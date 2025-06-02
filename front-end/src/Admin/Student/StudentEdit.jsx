@@ -1,13 +1,14 @@
 import React from "react";
-import { Edit, SimpleForm, TextInput, required ,ReferenceArrayInput,SelectArrayInput} from "react-admin";
+import { Edit, SimpleForm, TextInput, required ,ReferenceArrayInput,SelectArrayInput, email} from "react-admin";
+import InputVildcation from "../../components/inputvildcation";
 
 const StudentEdit = (props) => {
   return (
     <Edit {...props}>
       <SimpleForm>
-        <TextInput source="firstName" label="First Name" fullWidth validate={[required()]} />
-        <TextInput source="lastName" label="Last Name" fullWidth validate={[required()]} />
-        <TextInput source="email" label="Email" fullWidth validate={[required()]} />
+        <TextInput source="firstName" label="First Name" fullWidth validate={[required()]}     parse={value => InputVildcation(value, "letter")}/>
+        <TextInput source="lastName" label="Last Name" fullWidth validate={[required()]}     parse={value => InputVildcation(value, "letter")}/>
+        <TextInput source="email" label="Email" fullWidth validate={[required() , email()]} />
         <TextInput source="semester" type="number" label="semester" fullWidth validate={[required()]} />
         <TextInput source="year" type="number" label="year" fullWidth validate={[required()]} />
         <ReferenceArrayInput 

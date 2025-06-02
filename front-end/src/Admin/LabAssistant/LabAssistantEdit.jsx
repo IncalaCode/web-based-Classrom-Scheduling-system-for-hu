@@ -4,8 +4,10 @@ import {   Edit,
   TextInput,  
   ReferenceArrayInput, 
   SelectArrayInput,
-
+  required,
+  email,
 } from "react-admin";
+import InputVildcation from "../../components/inputvildcation";
 
 const LabAssistantEdit = (props) => {
   return (
@@ -15,16 +17,19 @@ const LabAssistantEdit = (props) => {
           source="firstName" 
           label="First Name" 
           fullWidth 
+           parse={value => InputVildcation(value, "letter")}
         />
         <TextInput 
           source="lastName" 
           label="Last Name" 
           fullWidth 
+           parse={value => InputVildcation(value, "letter")}
         />
         <TextInput 
           source="email" 
           label="Email" 
           fullWidth 
+          validate={[required(), email()]} 
         />
 
 

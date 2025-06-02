@@ -18,7 +18,7 @@ const LabAssistantList = () => (
         <TextField source="lastName" label="Last Name"  />
         <TextField source="email" label="Email"  />
         <TextField source="address" label="address"  />
-        <TextField source="departmentId" type="tel" label="Department Name"  />
+        {/* <TextField source="departmentId" type="tel" label="Department Name"  /> */}
       <EditButton />
       <DeleteButton />
     </Datagrid>

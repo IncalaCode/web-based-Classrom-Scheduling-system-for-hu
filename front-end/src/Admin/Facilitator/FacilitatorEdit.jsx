@@ -7,6 +7,7 @@ import {
   email,
 } from "react-admin";
 import { useParams } from 'react-router-dom';
+import InputVildcation from "../../components/inputvildcation";
 
 const validateFacilitatorName = (value) => {
   if (!value) {
@@ -29,12 +30,14 @@ const FacilitatorEdit = () => {
           label="First Name" 
           fullWidth 
           validate={[required()]}
+           parse={value => InputVildcation(value, "letter")}
         />
         <TextInput 
           source="lastName" 
           label="Last Name" 
           fullWidth 
           validate={[required()]}
+           parse={value => InputVildcation(value, "letter")}
         />
         <TextInput 
           source="FacilitatorName" 

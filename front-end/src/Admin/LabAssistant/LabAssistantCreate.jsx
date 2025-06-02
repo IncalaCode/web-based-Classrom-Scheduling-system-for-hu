@@ -9,6 +9,7 @@ import {
   required,
   email,
 } from "react-admin";
+import InputVildcation from "../../components/inputvildcation";
 
 const LabAssistantCreate = () => {
   return (
@@ -19,12 +20,14 @@ const LabAssistantCreate = () => {
           label="First Name" 
           fullWidth 
           validate={[required()]} 
+           parse={value => InputVildcation(value, "letter")}
         />
         <TextInput 
           source="lastName" 
           label="Last Name" 
           fullWidth 
           validate={[required()]} 
+           parse={value => InputVildcation(value, "letter")}
         />
         <TextInput 
           source="email" 

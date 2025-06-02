@@ -95,13 +95,7 @@ exports.delete = async (req, res) => {
       return res.status(404).json({ message: 'Facilitator not found' });
     }
 
-    // Check if the facilitator has any associated departments
-    const departments = await facilitator.getDepartments();
-    if (departments.length > 0) {
-      return res.status(400).json({ 
-        message: 'Cannot delete facilitator with associated departments. Please reassign or delete the departments first.'
-      });
-    }
+
 
     await facilitator.destroy();
 

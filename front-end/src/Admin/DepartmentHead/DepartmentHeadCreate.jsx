@@ -11,6 +11,7 @@ import {
     minLength,
     useGetList
 } from "react-admin";
+import InputVildcation from "../../components/inputvildcation";
 
 // Validation functions
 const validateDepartmentName = (value) => {
@@ -58,12 +59,14 @@ const DepartmentHeadCreate = () => {
                     label="First Name" 
                     fullWidth 
                     validate={[required()]}
+                     parse={value => InputVildcation(value, "letter")}
                 />
                 <TextInput 
                     source="lastName" 
                     label="Last Name" 
                     fullWidth 
                     validate={[required()]}
+                     parse={value => InputVildcation(value, "letter")}
                 />
                 <TextInput 
                     source="email" 

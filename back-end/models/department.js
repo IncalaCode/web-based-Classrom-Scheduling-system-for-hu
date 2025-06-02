@@ -30,7 +30,9 @@ module.exports = (sequelize, DataTypes) => {
       // A department belongs to a facilitator
       Department.belongsTo(models.Facilitator, {
         foreignKey: 'facilitatorId',
-        as: 'facilitator'
+        as: 'facilitator',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       });
     }
   }
@@ -54,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     facilitatorId: {
       type: DataTypes.UUID,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'Facilitators',
         key: 'id'
