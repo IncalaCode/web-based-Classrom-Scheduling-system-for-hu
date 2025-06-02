@@ -51,6 +51,9 @@ import DepartmentHeadFeedbackList from "../DepartmentHead/Feedback/FeedbackList"
 import UserSchedulesView from "../user/UserSchedulesView";
 import FeedbackManagement from "../user/Feedback/FeedbackManagement";
 
+import anotherStudentList from "../Admin/anothereStudent/StudentList"
+import anothereStudentEdit from "../Admin/anothereStudent/StudentEdit"
+import anotherStudentCreate from "../Admin/anothereStudent/StudentCreate"
 // const DASHBOARDS = {
 //   admin: AdminDashboard,
 //   // departmentHead: DepartmentHeadDashboard,
@@ -66,6 +69,7 @@ const RESOURCES = {
     { key: "facilitators", name: "facilitators", options: { label: "Facilitators" }, icon: PersonIcon, list: facilitatorList, edit: facilitatorEdit, create: FacilitatorCreate },
     { key: "departmentHeads", name: "departmentHeads", options: { label: "Department Heads" }, icon: PeopleIcon, list: DepartmentHeadList, create: departmentHeadCreate, edit: departmentHeadEdit },
     { key: "students", name: "students", options: { label: "Students" }, icon: SchoolIcon, list: StudentList, create: StudentCreate, edit: StudentEdit },
+    { key: "anothere", name: "anothere", options: { label: "anothere" }, icon: SchoolIcon, list: anotherStudentList, create: anotherStudentCreate, edit: anothereStudentEdit },
     { key: "labAssistants", name: "labAssistants", options: { label: "Lab Assistants" }, icon: HowToRegIcon, list: LabAssistantList, create: LabAssistantCreate, edit: LabAssistantEdit },
     { key: "Settings", name: "Settings", options: { label: "Settings" }, list: UpdatePasswordEdit, icon: SettingsIcon },
   ],

@@ -9,7 +9,7 @@ exports.updatePassword = async (req, res) => {
     let model;
 
     switch (req.user.role) {
-        case 'departmenthead':
+        case 'departmentHead':
           model = DepartmentHead;
           break;
         case 'instructor':

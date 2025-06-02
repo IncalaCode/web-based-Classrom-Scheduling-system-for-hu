@@ -7,7 +7,7 @@ import {
   DeleteButton, 
 } from "react-admin";
 
-const StudentList = () => (
+const anotherStudentList = () => (
   <List 
     sort={{ field: 'created_at', order: 'DESC' }}
     perPage={25}
@@ -26,4 +26,4 @@ const StudentList = () => (
   </List>
 );
 
-export default StudentList;
+export default anotherStudentList;
